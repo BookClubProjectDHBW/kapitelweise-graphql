@@ -1,0 +1,40 @@
+
+
+type Query{
+    member: Member!
+}
+
+type Bookclub {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+type Membership{
+    role: Role!
+    bookclub: Bookclub!
+}
+
+type Invitation{
+    id: ID!
+    bookclub: Bookclub!
+    invitedBy: User!
+    createdAt: String!
+}
+
+enum Role {
+    ADMIN
+    MEMBER
+}
+
+type User{
+    id: ID!
+    name: String!
+}
+
+type Member{
+    id: ID!
+    name: String!
+    membership: [Membership!]!
+    invitationPending: [Invitation!]!
+}

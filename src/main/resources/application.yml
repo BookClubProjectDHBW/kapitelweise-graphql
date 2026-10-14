@@ -1,0 +1,19 @@
+server:
+  port: 8383
+
+spring:
+  web:
+    error:
+      include-message: always
+  sql:
+    init:
+      mode: always
+      platform: postgres
+  profiles:
+    active: niklas
+
+
+app:
+  cors:
+    allowed-origins:  http://localhost:63342
+    #https://kapitelweisefrontend-c5afec02989c.herokuapp.com

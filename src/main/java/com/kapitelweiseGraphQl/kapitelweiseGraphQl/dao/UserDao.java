@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface UserDao {
     Optional<Long> getUserId(String username);
+
 }

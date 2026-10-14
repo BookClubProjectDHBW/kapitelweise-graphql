@@ -7,24 +7,14 @@ type Query{
 type Bookclub {
     id: ID!
     name: String!
-    description: String!
-}
-
-type Membership{
-    role: Role!
-    bookclub: Bookclub!
+    description: String
 }
 
 type Invitation{
     id: ID!
     bookclub: Bookclub!
-    invitedBy: User!
     createdAt: String!
-}
-
-enum Role {
-    ADMIN
-    MEMBER
+    invitedBy: User!
 }
 
 type User{
@@ -35,6 +25,6 @@ type User{
 type Member{
     id: ID!
     name: String!
-    membership: [Membership!]!
+    membership: [Bookclub!]!
     invitationPending: [Invitation!]!
 }

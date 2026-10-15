@@ -28,3 +28,23 @@ type Member{
     membership: [Bookclub!]!
     invitationPending: [Invitation!]!
 }
+
+type Mutation{
+    createNewBookClub(bookClubInput: BookClubInput!): Bookclub!
+    responseInvitation(invitationInput: InvitationInput!): Bookclub
+}
+
+input InvitationInput{
+    invitationId: ID!
+    status: InvitationResponseStatus!
+}
+
+enum InvitationResponseStatus{
+    ACCEPTED
+    DECLINED
+}
+
+input BookClubInput{
+    name: String!
+    description: String
+}

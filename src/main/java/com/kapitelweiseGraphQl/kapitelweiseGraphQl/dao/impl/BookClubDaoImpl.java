@@ -1,6 +1,7 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,25 @@ public class BookClubDaoImpl implements BookclubDao {
 
     public BookClubDaoImpl(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+
+    @Override
+    public BookClub createBookclub(BookClub bookClub){
+
+        return jdbcTemplate.queryForObject("insert into bookclub(name, description) Values(?, ?) Returning id, name, description, created_at",
+                (rs, rowNum) -> new BookClub(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                ), bookClub.getName(), bookClub.getDescription());
+    }
+
+    @Override
+    public void addMember(Long bookclubId, String username, String role){
+        Long userId = jdbcTemplate.queryForObject("Select id from users where username = ?", Long.class, username);
+        jdbcTemplate.update("Insert into clubmember (bookclub_id, userId, role) Values(?,?,?)", bookclubId, userId, role);
     }
 
 

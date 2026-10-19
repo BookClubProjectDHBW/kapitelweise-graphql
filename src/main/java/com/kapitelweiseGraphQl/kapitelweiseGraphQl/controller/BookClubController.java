@@ -1,6 +1,7 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.controller;
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.requests.BookClubInput;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.service.BookClubService;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -22,5 +23,10 @@ public class BookClubController {
     @MutationMapping
     public BookClubResponse createNewBookClub(@Argument BookClubInput bookClubInput, @AuthenticationPrincipal String username){
         return bookClubService.createNewBookClub(bookClubInput.name(), bookClubInput.description(), username);
+    }
+
+    @QueryMapping
+    public BookClubDetailResponse bookclub(@Argument Long id, @AuthenticationPrincipal String username){
+        return bookClubService.getBookClubDetails(id, username);
     }
 }

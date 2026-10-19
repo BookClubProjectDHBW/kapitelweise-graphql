@@ -8,7 +8,7 @@ import java.util.Optional;
 
 //die konkrete Implementierung, hier führen wir unten die Datenbankabfrage durch.
 //@Repository ist ein Spring Annotation, die sagt, dass diese Klasse ein Repository ist, also eine Datenzugriffsschicht.
-// Geschrieben wird die Tabelle users nur vom Auth-Service, hier wird nur gelesen.
+// club_user wird über die Queue aus dem Auth-Service befüllt.
 
 
 @Repository
@@ -23,8 +23,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<Long> getUserId(String username){
-        return jdbcTemplate.queryForList("select id from users where username = ?", Long.class, username)
+        return jdbcTemplate.queryForList("select id from club_user where username = ?", Long.class, username)
                 .stream().findFirst();
 
+    }
+
+    @Override
+    public void upsertUser(Long id, String username) {
+        String sql = """
+        INSERT INTO club_user (id, username)
+        VALUES (?, ?)
+        ON CONFLICT (id) 
+        DO UPDATE SET username = EXCLUDED.username
+    """;
+
+        jdbcTemplate.update(sql, id, username);
     }
 }

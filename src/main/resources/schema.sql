@@ -1,4 +1,10 @@
--- die Tabelle users legt der Auth-Service an, er muss deshalb vor dem Backend gestartet werden
+Create SCHEMA  if not exists  club;
+SET search_path TO club, public;
+
+create table if not exists club_user(
+                                        id BIGINT PRIMARY KEY,
+                                        username varchar(50) not null unique
+);
 
 -- Buchclubs
 CREATE TABLE IF NOT EXISTS bookclub (
@@ -14,7 +20,7 @@ CREATE TABLE IF NOT EXISTS clubmember (
                                            id            BIGSERIAL   PRIMARY KEY,
                                            role          VARCHAR(10) NOT NULL,
     join_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    userid       BIGINT      NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    userid       BIGINT      NOT NULL REFERENCES club_user (id) ON DELETE CASCADE,
     bookclub_id  BIGINT      NOT NULL REFERENCES bookclub (id) ON DELETE CASCADE
     );
 
@@ -28,9 +34,9 @@ Create Table if not exists invitation(
     id Bigserial primary key,
     invitation_status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (invitation_status IN ('PENDING', 'ACCEPTED', 'DECLINED')),
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    invited_user_id bigint not null references users(id) on delete cascade,
+    invited_user_id bigint not null references club_user(id) on delete cascade,
     bookclub_id bigint not null references bookclub(id) on delete cascade,
-    invited_by_user_id bigint not null references users(id) on delete cascade,
+    invited_by_user_id bigint not null references club_user(id) on delete cascade,
     answered_at TIMESTAMP
 );
 
@@ -41,3 +47,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
 
 -- für bestehende Datenbanken, auf denen die Tabelle schon ohne answered_at angelegt wurde
 ALTER TABLE invitation ADD COLUMN IF NOT EXISTS answered_at TIMESTAMP;
+
+
+
+GRANT USAGE ON SCHEMA club TO clubservice;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA club TO clubservice;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA club TO clubservice;

@@ -1,7 +1,9 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.controller;
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.requests.InvitationInput;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.requests.InviteUserInput;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.InvitationResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.service.InvitationService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -22,5 +24,10 @@ public class InvitationController {
     @MutationMapping
     public BookClubResponse responseInvitation(@Argument InvitationInput invitationInput, @AuthenticationPrincipal String username){
         return invitationService.responseInvitation(invitationInput.invitationId(), invitationInput.status(), username);
+    }
+
+    @MutationMapping
+    public InvitationResponse inviteUser(@Argument InviteUserInput inviteUserInput, @AuthenticationPrincipal String username){
+        return invitationService.registerNewInvitation(inviteUserInput.bookclubId(), inviteUserInput.username(), username);
     }
 }

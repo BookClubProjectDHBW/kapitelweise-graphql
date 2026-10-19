@@ -3,8 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/kapitelweise
-    username: niklasultzhofer
+    url: jdbc:postgresql://localhost:5432/kapitelweise?currentSchema=club
+    username: clubservice
+    password: clubServicePassword
     driver-class-name: org.postgresql.Driver
 
 app:

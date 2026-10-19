@@ -17,3 +17,9 @@ app:
   cors:
     allowed-origins:  http://localhost:63342
     #https://kapitelweisefrontend-c5afec02989c.herokuapp.com
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAY3L2M2AWGTQQ37PP
+      secret-key: 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

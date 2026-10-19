@@ -2,6 +2,21 @@
 
 type Query{
     member: Member!
+    bookclub(id: ID!): BookclubDetail!
+}
+
+type BookclubDetail{
+    id: ID!
+    bookClubName: String!
+    description: String
+    role: String!
+}
+
+type SentInvitation{
+    id: ID!
+    invitationStatus: String!
+    invitedUser: String!
+    createdAt: String!
 }
 
 type Bookclub {
@@ -32,6 +47,12 @@ type Member{
 type Mutation{
     createNewBookClub(bookClubInput: BookClubInput!): Bookclub!
     responseInvitation(invitationInput: InvitationInput!): Bookclub
+    inviteUser(inviteUserInput: InviteUserInput!): SentInvitation!
+}
+
+input InviteUserInput{
+    bookclubId: ID!
+    username: String!
 }
 
 input InvitationInput{

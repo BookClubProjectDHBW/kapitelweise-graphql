@@ -2,6 +2,7 @@ package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -35,7 +36,7 @@ public class BookClubDaoImpl implements BookclubDao {
 
     @Override
     public void addMember(Long bookclubId, String username, String role){
-        Long userId = jdbcTemplate.queryForObject("Select id from users where username = ?", Long.class, username);
+        Long userId = jdbcTemplate.queryForObject("Select id from club_user where username = ?", Long.class, username);
         jdbcTemplate.update("Insert into clubmember (bookclub_id, userId, role) Values(?,?,?)", bookclubId, userId, role);
     }
 
@@ -46,7 +47,7 @@ public class BookClubDaoImpl implements BookclubDao {
         select bookclub.name,  bookclub.description, bookclub.id
         from bookclub
         join clubmember on clubmember.bookclub_id = bookclub.id
-        join users on users.id = clubmember.userid
+        join club_user on club_user.id = clubmember.userid
         where username = ?;
         """;
         return jdbcTemplate.query(sql,(rs, rowNum) ->
@@ -57,6 +58,35 @@ public class BookClubDaoImpl implements BookclubDao {
                         ),
 
                 username
+        );
+    }
+
+    @Override
+    public boolean bookclubExists(Long clubId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM bookclub WHERE id = ?",
+                Integer.class, clubId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public BookClubDetailResponse getClubDetails(Long clubId, String username){
+        String sql= """
+                select bookclub.id, bookclub.name,  bookclub.description, clubmember.role
+                from bookclub
+                join clubmember on clubmember.bookclub_id = bookclub.id
+                join club_user on club_user.id = clubmember.userid
+                where bookclub.id = ? and club_user.username = ? ;
+                """;
+        return jdbcTemplate.queryForObject(sql,(rs, rowNum) ->
+                        new BookClubDetailResponse(
+                                rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getString("description"),
+                                rs.getString("role")
+                        ),
+
+                clubId, username
         );
     }
 }

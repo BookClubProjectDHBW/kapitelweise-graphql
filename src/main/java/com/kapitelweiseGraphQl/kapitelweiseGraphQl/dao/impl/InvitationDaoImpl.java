@@ -5,6 +5,7 @@ import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.InvitationDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.Invitation;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.InvitationStatus;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.InvitationResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.InvitationUserResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.UserResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,8 +29,8 @@ public class InvitationDaoImpl implements InvitationDao {
       
      SELECT invitation.id AS invId, bookclub.id AS clubId, bookclub.name, bookclub.description, invitation.created_at, inviter.id AS invitedById, inviter.username AS invitedByName
       FROM invitation
-      JOIN users invited ON invited.id = invitation.invited_user_id
-      JOIN users inviter ON inviter.id = invitation.invited_by_user_id
+      JOIN club_user invited ON invited.id = invitation.invited_user_id
+      JOIN club_user inviter ON inviter.id = invitation.invited_by_user_id
       JOIN bookclub ON bookclub.id = invitation.bookclub_id
       WHERE invited.username = ?
         AND invitation.invitation_status = 'PENDING'
@@ -64,9 +65,9 @@ public class InvitationDaoImpl implements InvitationDao {
                 SELECT invitation.id, invitation.invited_user_id,
                        bookclub.id AS club_id, bookclub.name, bookclub.description
                 FROM invitation
-                JOIN users    ON users.id = invitation.invited_user_id
+                JOIN club_user ON club_user.id = invitation.invited_user_id
                 JOIN bookclub ON bookclub.id = invitation.bookclub_id
-                WHERE invitation.id = ? AND users.username = ?
+                WHERE invitation.id = ? AND club_user.username = ?
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) ->
@@ -101,5 +102,41 @@ public class InvitationDaoImpl implements InvitationDao {
                 VALUES ('MEMBER', ?, ?)
                 ON CONFLICT (userid, bookclub_id) DO NOTHING
                 """, userId, bookClubId);
+    }
+
+    @Override
+    public boolean isUserAdmin(Long userId, Long bookClubId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM clubmember WHERE userid = ? AND bookclub_id = ? AND role = 'ADMIN'",
+                Integer.class, userId, bookClubId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public InvitationResponse createInvitation(Long bookClubId, Long invitedUserId, Long invitedById, String invitedUsername) {
+        return jdbcTemplate.queryForObject("insert into invitation(invitation_status, invited_user_id, bookclub_id, invited_by_user_id) Values(?,?,?,?) Returning id, invitation_status, created_at",
+                (rs, rowNum) -> new InvitationResponse(
+                        rs.getLong("id"),
+                        rs.getString("invitation_status"),
+                        invitedUsername,
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                ), InvitationStatus.PENDING.name(), invitedUserId, bookClubId, invitedById);
+    }
+
+    @Override
+    public boolean isAlreadyMember(Long invitedUserId, Long bookClubId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM clubmember WHERE userid = ? AND bookclub_id = ?",
+                Integer.class, invitedUserId, bookClubId);
+        return count != null && count > 0;
+    }
+
+
+    @Override
+    public boolean invitationPending(Long invitedUserId, Long bookClubId) {
+        Integer count = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM invitation WHERE invited_user_id = ? AND bookclub_id = ? AND invitation_status = 'PENDING'",
+                Integer.class, invitedUserId, bookClubId);
+        return count != null && count > 0;
     }
 }

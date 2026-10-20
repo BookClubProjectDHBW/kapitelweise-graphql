@@ -2,6 +2,7 @@ package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.InvitationDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.Invitation;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.InvitationStatus;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
@@ -63,7 +64,7 @@ public class InvitationDaoImpl implements InvitationDao {
     public Optional<Invitation> findInvitation(Long invitationId, String username) {
         String sql = """
                 SELECT invitation.id, invitation.invited_user_id,
-                       bookclub.id AS club_id, bookclub.name, bookclub.description
+                       bookclub.id AS club_id, bookclub.name, bookclub.description, bookclub.created_at
                 FROM invitation
                 JOIN club_user ON club_user.id = invitation.invited_user_id
                 JOIN bookclub ON bookclub.id = invitation.bookclub_id
@@ -74,10 +75,11 @@ public class InvitationDaoImpl implements InvitationDao {
                         new Invitation(
                                 rs.getLong("id"),
                                 rs.getLong("invited_user_id"),
-                                new BookClubResponse(
+                                new BookClub(
                                         rs.getLong("club_id"),
                                         rs.getString("name"),
-                                        rs.getString("description")
+                                        rs.getString("description"),
+                                        rs.getTimestamp("created_at").toLocalDateTime()
                                 )
                         ),
                         invitationId, username)

@@ -4,6 +4,7 @@ package com.kapitelweiseGraphQl.kapitelweiseGraphQl.service;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.InvitationDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.UserDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.Invitation;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.InvitationStatus;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
@@ -47,9 +48,10 @@ public class InvitationService {
             return null;
         }
 
-        invitationDao.addMember(invitation.invitedUserId(), invitation.bookclub().getId());
-        amazonSQSService.sendNewMember("MEMBER_JOINED", invitation.invitedUserId(), username, invitation.bookclub().getId(), "MEMBER");
-        return invitation.bookclub();
+        BookClub bookclub = invitation.bookclub();
+        invitationDao.addMember(invitation.invitedUserId(), bookclub.getId());
+        amazonSQSService.sendNewMember("MEMBER_JOINED", invitation.invitedUserId(), username, bookclub.getId(), "MEMBER");
+        return new BookClubResponse(bookclub.getId(), bookclub.getName(), bookclub.getDescription());
     }
 
 

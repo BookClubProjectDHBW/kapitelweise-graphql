@@ -34,6 +34,7 @@ public class AmazonSQSService {
         this.jsonMapper = jsonMapper;
     }
 
+
     @Scheduled(fixedDelay = 1000)
     public void pollNewUser(){
         ReceiveMessageRequest request = new ReceiveMessageRequest()
@@ -43,7 +44,7 @@ public class AmazonSQSService {
 
         List<Message> messages = sqs.receiveMessage(request).getMessages();
         for (Message message : messages) {
-            log.info("SQS-Nachricht empfangen: " + message.getBody());
+            log.info("SQS-Nachricht von User Queue empfangen: " + message.getBody());
             try {
                 UserEvent event = jsonMapper.readValue(message.getBody(), UserEvent.class);
 

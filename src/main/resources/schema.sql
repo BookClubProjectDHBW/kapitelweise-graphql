@@ -1,6 +1,3 @@
-Create SCHEMA  if not exists  club;
-SET search_path TO club, public;
-
 create table if not exists club_user(
                                         id BIGINT PRIMARY KEY,
                                         username varchar(50) not null unique
@@ -47,9 +44,3 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
 
 -- für bestehende Datenbanken, auf denen die Tabelle schon ohne answered_at angelegt wurde
 ALTER TABLE invitation ADD COLUMN IF NOT EXISTS answered_at TIMESTAMP;
-
-
-
-GRANT USAGE ON SCHEMA club TO clubservice;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA club TO clubservice;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA club TO clubservice;

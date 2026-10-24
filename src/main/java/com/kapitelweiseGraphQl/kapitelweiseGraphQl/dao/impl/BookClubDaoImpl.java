@@ -35,8 +35,7 @@ public class BookClubDaoImpl implements BookclubDao {
     }
 
     @Override
-    public void addMember(Long bookclubId, String username, String role){
-        Long userId = jdbcTemplate.queryForObject("Select id from club_user where username = ?", Long.class, username);
+    public void addMember(Long bookclubId, Long userId, String role){
         jdbcTemplate.update("Insert into clubmember (bookclub_id, userId, role) Values(?,?,?)", bookclubId, userId, role);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 public interface BookclubDao {
     List<BookClubResponse> getBookClubForMember(String username);
     BookClub createBookclub(BookClub bookClub);
-    void addMember(Long bookclubId, String username, String role);
+    void addMember(Long bookclubId, Long userId, String role);
     BookClubDetailResponse getClubDetails(Long clubId, String username);
     boolean bookclubExists(Long clubId);
 }

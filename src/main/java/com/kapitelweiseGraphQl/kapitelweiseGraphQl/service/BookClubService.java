@@ -45,12 +45,15 @@ public class BookClubService {
         if(name.length() > 25) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ("Eingabe zu lang!"));
 
         if(description != null && description.length() > 250) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ("Eingabe zu lang!"));
-        BookClub bookclub = bookclubDao.createBookclub(new BookClub(name, description));
-
-        bookclubDao.addMember(bookclub.getId(), username, "ADMIN");
 
         Long userId = userDao.getUserId(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Diese UserId existiert nicht."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dein Konto wird gerade eingerichtet, versuch es in ein paar Sekunden noch mal"));
+
+        BookClub bookclub = bookclubDao.createBookclub(new BookClub(name, description));
+
+        bookclubDao.addMember(bookclub.getId(), userId, "ADMIN");
+
+
         amazonSQSService.sendNewMember("MEMBER_JOINED", userId, username, bookclub.getId(), "ADMIN");
 
 

@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.UserDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.UserEvent;
@@ -24,13 +25,15 @@ public class AmazonSQSService {
 
     private final AmazonSQS sqs;
     private final UserDao userDao;
+    private final BookclubDao bookclubDao;
     private final JsonMapper jsonMapper;
     private static final String USER_QUEUE_URL = "https://sqs.eu-north-1.amazonaws.com/608531435564/userDetails.fifo";
     private static final String MEMBER_QUEUE_URL = "https://sqs.eu-north-1.amazonaws.com/608531435564/clubMembers.fifo";
 
-    public AmazonSQSService(AmazonSQS sqs, UserDao userDao, JsonMapper jsonMapper) {
+    public AmazonSQSService(AmazonSQS sqs, UserDao userDao, BookclubDao bookclubDao, JsonMapper jsonMapper) {
         this.sqs = sqs;
         this.userDao = userDao;
+        this.bookclubDao = bookclubDao;
         this.jsonMapper = jsonMapper;
     }
 
@@ -50,6 +53,9 @@ public class AmazonSQSService {
 
                 if (event.type().equals("USER_CREATED")) {
                     userDao.upsertUser(event.userId(), event.username());
+                    log.info(event.username() + " ist jetzt auch hier angekommen");
+                } else {
+                    log.warn("Unbekannter Event-Typ in userDetails: " + event.type() + ", keine Ahnung was das soll");
                 }
                 sqs.deleteMessage(USER_QUEUE_URL, message.getReceiptHandle());
             } catch (Exception e) {
@@ -68,8 +74,20 @@ public class AmazonSQSService {
                     .withMessageGroupId(String.valueOf(bookclubId))
                     .withMessageDeduplicationId(UUID.randomUUID().toString());
             sqs.sendMessage(send);
+            bookclubDao.markMemberSent(userId, bookclubId);
+            log.info(username + " als " + role + " von Club " + bookclubId + " in die Queue gelegt");
         } catch (Exception e) {
-            log.error("MemberEvent konnte nicht gesendet werden: " + e.getMessage());
+            log.error("MemberEvent für " + username + " konnte nicht gesendet werden, probieren wir gleich nochmal: " + e.getMessage());
+        }
+    }
+
+
+    @Scheduled(fixedDelay = 60000)
+    public void sendMemberAgain(){
+        List<MemberEvent> unsent = bookclubDao.getUnsentMembers();
+        for (MemberEvent event : unsent) {
+            log.warn(event.username() + " hängt noch in Club " + event.bookclubId() + ", schicken wir nochmal los");
+            sendNewMember(event.type(), event.userId(), event.username(), event.bookclubId(), event.role());
         }
     }
 }

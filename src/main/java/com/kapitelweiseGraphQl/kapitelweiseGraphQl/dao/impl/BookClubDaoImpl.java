@@ -2,6 +2,7 @@ package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -87,5 +88,30 @@ public class BookClubDaoImpl implements BookclubDao {
 
                 clubId, username
         );
+    }
+
+    @Override
+    public List<MemberEvent> getUnsentMembers(){
+        String sql = """
+                select clubmember.userid, club_user.username, clubmember.bookclub_id, clubmember.role
+                from clubmember
+                join club_user on club_user.id = clubmember.userid
+                where clubmember.member_sent = false
+                and clubmember.join_date < now() - interval '2 minutes'
+                """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new MemberEvent(
+                        "MEMBER_JOINED",
+                        rs.getLong("userid"),
+                        rs.getString("username"),
+                        rs.getLong("bookclub_id"),
+                        rs.getString("role")
+                ));
+    }
+
+    @Override
+    public void markMemberSent(Long userId, Long bookclubId){
+        jdbcTemplate.update("update clubmember set member_sent = true where userid = ? and bookclub_id = ?", userId, bookclubId);
     }
 }

@@ -1,16 +1,16 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberDepartureEvent;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 
 
 @Repository
@@ -114,4 +114,41 @@ public class BookClubDaoImpl implements BookclubDao {
     public void markMemberSent(Long userId, Long bookclubId){
         jdbcTemplate.update("update clubmember set member_sent = true where userid = ? and bookclub_id = ?", userId, bookclubId);
     }
+    @Override
+public int removeMember(Long clubId, Long userId) {
+    return jdbcTemplate.update(
+            "DELETE FROM clubmember WHERE bookclub_id = ? AND userid = ? AND role = 'MEMBER'",
+            clubId, userId
+    );
+}
+@Override
+public void enqueueMemberDeparture(Long clubId, Long userId, String username, String role) {
+    jdbcTemplate.update("""
+            INSERT INTO member_departure_outbox (user_id, username, bookclub_id, role)
+            VALUES (?, ?, ?, ?)
+            """, userId, username, clubId, role);
+}
+
+@Override
+public List<MemberDepartureEvent> getPendingMemberDepartures() {
+    return jdbcTemplate.query("""
+            SELECT id, user_id, username, bookclub_id, role
+            FROM member_departure_outbox
+            ORDER BY id
+            """, (rs, rowNum) -> new MemberDepartureEvent(
+            rs.getLong("id"),
+            rs.getLong("user_id"),
+            rs.getString("username"),
+            rs.getLong("bookclub_id"),
+            rs.getString("role")
+    ));
+}
+
+@Override
+public void markMemberDepartureSent(Long eventId) {
+    jdbcTemplate.update(
+            "DELETE FROM member_departure_outbox WHERE id = ?",
+            eventId
+    );
+}
 }

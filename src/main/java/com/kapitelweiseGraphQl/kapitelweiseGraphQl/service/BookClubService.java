@@ -1,10 +1,7 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.service;
 
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.UserDao;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,8 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.UserDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
 
 @Service
 public class BookClubService {
@@ -47,7 +47,35 @@ public class BookClubService {
            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Kein Mitglied dieses Buchclubs");
         }
     }
+@Transactional
+public boolean leaveBookClub(Long clubId, String username) {
+    BookClubDetailResponse club = getBookClubDetails(clubId, username);
 
+    if ("ADMIN".equals(club.role())) {
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Der Admin kann den Buchclub nicht verlassen."
+        );
+    }
+
+    Long userId = userDao.getUserId(username)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Benutzer nicht gefunden."
+            ));
+
+    if (bookclubDao.removeMember(clubId, userId) != 1) {
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Mitgliedschaft konnte nicht entfernt werden."
+        );
+    }
+
+    bookclubDao.enqueueMemberDeparture(clubId, userId, username, "MEMBER");
+
+    log.info(username + " hat Club " + clubId + " verlassen");
+    return true;
+}
     @Transactional
     public BookClubResponse createNewBookClub(String name, String description, String username){
 

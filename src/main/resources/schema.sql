@@ -46,3 +46,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
 ALTER TABLE invitation ADD COLUMN IF NOT EXISTS answered_at TIMESTAMP;
 
 ALTER TABLE clubmember ADD COLUMN IF NOT EXISTS member_sent BOOLEAN NOT NULL DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS member_departure_outbox (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    bookclub_id BIGINT NOT NULL,
+    role VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

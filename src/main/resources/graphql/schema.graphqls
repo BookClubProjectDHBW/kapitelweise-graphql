@@ -48,6 +48,7 @@ type Mutation{
     createNewBookClub(bookClubInput: BookClubInput!): Bookclub!
     responseInvitation(invitationInput: InvitationInput!): Bookclub
     inviteUser(inviteUserInput: InviteUserInput!): SentInvitation!
+    leaveBookClub(clubId: ID!): Boolean!
 }
 
 input InviteUserInput{

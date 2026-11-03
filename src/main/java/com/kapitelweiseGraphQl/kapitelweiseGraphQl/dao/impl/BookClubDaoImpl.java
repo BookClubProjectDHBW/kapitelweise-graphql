@@ -1,15 +1,15 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.impl;
 
+import java.util.List;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 
 
@@ -114,4 +114,11 @@ public class BookClubDaoImpl implements BookclubDao {
     public void markMemberSent(Long userId, Long bookclubId){
         jdbcTemplate.update("update clubmember set member_sent = true where userid = ? and bookclub_id = ?", userId, bookclubId);
     }
+    @Override
+public int removeMember(Long clubId, Long userId) {
+    return jdbcTemplate.update(
+            "DELETE FROM clubmember WHERE bookclub_id = ? AND userid = ? AND role = 'MEMBER'",
+            clubId, userId
+    );
+}
 }

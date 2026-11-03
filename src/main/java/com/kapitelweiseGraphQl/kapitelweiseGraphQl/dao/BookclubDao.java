@@ -1,9 +1,10 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao;
+import java.util.List;
+
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.BookClub;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
-import java.util.List;
 
 
 public interface BookclubDao {
@@ -14,4 +15,5 @@ public interface BookclubDao {
     boolean bookclubExists(Long clubId);
     List<MemberEvent> getUnsentMembers();
     void markMemberSent(Long userId, Long bookclubId);
+    int removeMember(Long clubId, Long userId);
 }

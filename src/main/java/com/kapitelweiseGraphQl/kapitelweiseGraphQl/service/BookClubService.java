@@ -71,7 +71,7 @@ public boolean leaveBookClub(Long clubId, String username) {
         );
     }
 
-    bookclubDao.enqueueMemberDeparture(clubId, userId, username, "MEMBER");
+amazonSQSService.sendMemberDeparture(userId, username, clubId);
 
     log.info(username + " hat Club " + clubId + " verlassen");
     return true;

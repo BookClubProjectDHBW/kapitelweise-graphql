@@ -6,7 +6,7 @@ import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberDepartureEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubDetailResponse;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.response.BookClubResponse;
-import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberDepatureEvent;
+
 
 public interface BookclubDao {
     List<BookClubResponse> getBookClubForMember(String username);

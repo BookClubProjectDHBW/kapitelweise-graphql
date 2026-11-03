@@ -1,21 +1,24 @@
 package com.kapitelweiseGraphQl.kapitelweiseGraphQl.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.BookclubDao;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.dao.UserDao;
+import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberDepartureEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.MemberEvent;
 import com.kapitelweiseGraphQl.kapitelweiseGraphQl.domain.UserEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import tools.jackson.databind.json.JsonMapper;
 
-import java.util.List;
-import java.util.UUID;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class AmazonSQSService {
@@ -89,5 +92,38 @@ public class AmazonSQSService {
             log.warn(event.username() + " hängt noch in Club " + event.bookclubId() + ", schicken wir nochmal los");
             sendNewMember(event.type(), event.userId(), event.username(), event.bookclubId(), event.role());
         }
+        
     }
+    @Scheduled(fixedDelay = 60000)
+public void sendMemberDepartures() {
+    List<MemberDepartureEvent> departures = bookclubDao.getPendingMemberDepartures();
+
+    for (MemberDepartureEvent event : departures) {
+        try {
+            MemberEvent memberEvent = new MemberEvent(
+                    "MEMBER_LEFT",
+                    event.userId(),
+                    event.username(),
+                    event.bookclubId(),
+                    event.role()
+            );
+
+            String body = jsonMapper.writeValueAsString(memberEvent);
+
+            SendMessageRequest request = new SendMessageRequest()
+                    .withQueueUrl(MEMBER_QUEUE_URL)
+                    .withMessageBody(body)
+                    .withMessageGroupId(String.valueOf(event.bookclubId()))
+                    .withMessageDeduplicationId("departure-" + event.id());
+
+            sqs.sendMessage(request);
+
+            bookclubDao.markMemberDepartureSent(event.id());
+
+            log.info(event.username() + " hat Club " + event.bookclubId() + " verlassen. Event gesendet.");
+        } catch (Exception e) {
+            log.error("Austritt von " + event.username() + " konnte nicht gesendet werden: " + e.getMessage());
+        }
+    }
+}
 }

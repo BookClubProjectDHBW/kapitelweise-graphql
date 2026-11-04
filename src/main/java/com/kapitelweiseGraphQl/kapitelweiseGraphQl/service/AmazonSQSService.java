@@ -96,10 +96,10 @@ public class AmazonSQSService {
                 .withMessageDeduplicationId(UUID.randomUUID().toString());
 
         sqs.sendMessage(request);
-
+        bookclubDao.markDepartureSent(userId, bookclubId);
         log.info(username + " hat Club " + bookclubId + " verlassen. Event gesendet.");
     } catch (Exception e) {
-        throw new IllegalStateException("Buchclub-Austritt konnte nicht übertragen werden.", e);
+        log.error("Austritt von " + username + " aus Club " + bookclubId + " konnte nicht gesendet werden, probieren wir gleich nochmal: " + e.getMessage());
     }
 }
 
@@ -111,5 +111,14 @@ public class AmazonSQSService {
             sendNewMember(event.type(), event.userId(), event.username(), event.bookclubId(), event.role());
         }
         
+    }
+
+    @Scheduled(fixedDelay = 60000)
+    public void sendDepartureAgain(){
+        List<MemberEvent> unsent = bookclubDao.getUnsentDepartures();
+        for (MemberEvent event : unsent) {
+            log.warn("Austritt von " + event.username() + " aus Club " + event.bookclubId() + " hängt noch, schicken wir nochmal los");
+            sendMemberDeparture(event.userId(), event.username(), event.bookclubId());
+        }
     }
 }

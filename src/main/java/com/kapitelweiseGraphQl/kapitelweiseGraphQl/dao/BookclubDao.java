@@ -16,4 +16,6 @@ public interface BookclubDao {
     List<MemberEvent> getUnsentMembers();
     void markMemberSent(Long userId, Long bookclubId);
     int removeMember(Long clubId, Long userId);
+    List<MemberEvent> getUnsentDepartures();
+    void markDepartureSent(Long userId, Long bookclubId);
 }

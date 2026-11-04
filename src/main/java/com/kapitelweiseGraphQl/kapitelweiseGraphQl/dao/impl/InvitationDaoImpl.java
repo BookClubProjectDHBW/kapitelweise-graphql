@@ -102,7 +102,9 @@ public class InvitationDaoImpl implements InvitationDao {
         jdbcTemplate.update("""
                 INSERT INTO clubmember (role, userid, bookclub_id)
                 VALUES ('MEMBER', ?, ?)
-                ON CONFLICT (userid, bookclub_id) DO NOTHING
+                ON CONFLICT (userid, bookclub_id) DO UPDATE
+                SET left_at = NULL, member_sent = false, join_date = now()
+                WHERE clubmember.left_at IS NOT NULL
                 """, userId, bookClubId);
     }
 
@@ -128,7 +130,7 @@ public class InvitationDaoImpl implements InvitationDao {
     @Override
     public boolean isAlreadyMember(Long invitedUserId, Long bookClubId) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM clubmember WHERE userid = ? AND bookclub_id = ?",
+                "SELECT COUNT(*) FROM clubmember WHERE userid = ? AND bookclub_id = ? AND left_at IS NULL",
                 Integer.class, invitedUserId, bookClubId);
         return count != null && count > 0;
     }

@@ -47,7 +47,7 @@ public class BookClubDaoImpl implements BookclubDao {
         from bookclub
         join clubmember on clubmember.bookclub_id = bookclub.id
         join club_user on club_user.id = clubmember.userid
-        where username = ?;
+        where username = ? and clubmember.left_at is null;
         """;
         return jdbcTemplate.query(sql,(rs, rowNum) ->
                         new BookClubResponse(
@@ -75,7 +75,7 @@ public class BookClubDaoImpl implements BookclubDao {
                 from bookclub
                 join clubmember on clubmember.bookclub_id = bookclub.id
                 join club_user on club_user.id = clubmember.userid
-                where bookclub.id = ? and club_user.username = ? ;
+                where bookclub.id = ? and club_user.username = ? and clubmember.left_at is null;
                 """;
         return jdbcTemplate.queryForObject(sql,(rs, rowNum) ->
                         new BookClubDetailResponse(
@@ -96,6 +96,7 @@ public class BookClubDaoImpl implements BookclubDao {
                 from clubmember
                 join club_user on club_user.id = clubmember.userid
                 where clubmember.member_sent = false
+                and clubmember.left_at is null
                 and clubmember.join_date < now() - interval '2 minutes'
                 """;
 
@@ -116,8 +117,33 @@ public class BookClubDaoImpl implements BookclubDao {
     @Override
 public int removeMember(Long clubId, Long userId) {
     return jdbcTemplate.update(
-            "DELETE FROM clubmember WHERE bookclub_id = ? AND userid = ? AND role = 'MEMBER'",
+            "UPDATE clubmember SET left_at = now() WHERE bookclub_id = ? AND userid = ? AND role = 'MEMBER' AND left_at IS NULL",
             clubId, userId
     );
 }
+
+    @Override
+    public List<MemberEvent> getUnsentDepartures(){
+        String sql = """
+                select clubmember.userid, club_user.username, clubmember.bookclub_id, clubmember.role
+                from clubmember
+                join club_user on club_user.id = clubmember.userid
+                where clubmember.left_at is not null
+                and clubmember.left_at < now() - interval '2 minutes'
+                """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new MemberEvent(
+                        "MEMBER_LEFT",
+                        rs.getLong("userid"),
+                        rs.getString("username"),
+                        rs.getLong("bookclub_id"),
+                        rs.getString("role")
+                ));
+    }
+
+    @Override
+    public void markDepartureSent(Long userId, Long bookclubId){
+        jdbcTemplate.update("delete from clubmember where userid = ? and bookclub_id = ? and left_at is not null", userId, bookclubId);
+    }
 }

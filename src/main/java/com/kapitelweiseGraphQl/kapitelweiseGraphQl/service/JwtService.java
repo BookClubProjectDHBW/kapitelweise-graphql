@@ -4,6 +4,7 @@ package com.kapitelweiseGraphQl.kapitelweiseGraphQl.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -15,13 +16,15 @@ import java.security.Key;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "mysecretkeymysecretkeymyxwsecretkeymysecretkey"; 
-    // muss so lange sein, sonst ist es bei mir auf Fehler gelaufen, später vllt. einen neuen erzeugen lassen
-    //bzw. eigentlich Umgebungsvariable, aber für Testzwecke erstmal so
+    private final String secretKey;
+
+    public JwtService(@Value("${app.jwt.secret}") String secretKey) {
+        this.secretKey = secretKey;
+    }
     
 
     private Key getSignedKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
 

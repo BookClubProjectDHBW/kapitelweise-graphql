@@ -6,5 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 app:
+  jwt:
+    secret: lokaler-entwicklungsschluessel-nur-fuer-localhost-kapitelweise
   cors:
     allowed-origins: http://localhost:63342

@@ -103,6 +103,7 @@ public class AmazonSQSService {
     }
 }
 
+    // Mit Hilfe der KI entwickelt
     @Scheduled(fixedDelay = 60000)
     public void sendMemberAgain(){
         List<MemberEvent> unsent = bookclubDao.getUnsentMembers();

@@ -21,6 +21,7 @@ public class UserService {
     }
 
 
+    // Mit Hilfe der KI entwickelt
     public Member returnMember(String username){
 
         Long id = userDao.getUserId(username)

@@ -89,6 +89,7 @@ public class BookClubDaoImpl implements BookclubDao {
         );
     }
 
+    // Mit Hilfe der KI entwickelt
     @Override
     public List<MemberEvent> getUnsentMembers(){
         String sql = """
@@ -110,6 +111,7 @@ public class BookClubDaoImpl implements BookclubDao {
                 ));
     }
 
+    // Mit Hilfe der KI entwickelt
     @Override
     public void markMemberSent(Long userId, Long bookclubId){
         jdbcTemplate.update("update clubmember set member_sent = true where userid = ? and bookclub_id = ?", userId, bookclubId);

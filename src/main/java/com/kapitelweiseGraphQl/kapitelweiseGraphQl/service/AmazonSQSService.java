@@ -66,6 +66,7 @@ public class AmazonSQSService {
         }
     }
 
+    // KI-Log Nr. 32
     public void sendNewMember(String type, Long userId, String username, Long bookclubId, String role){
 
         try {
@@ -103,7 +104,7 @@ public class AmazonSQSService {
     }
 }
 
-    // Mit Hilfe der KI entwickelt
+    // KI-Log Nr. 53
     @Scheduled(fixedDelay = 60000)
     public void sendMemberAgain(){
         List<MemberEvent> unsent = bookclubDao.getUnsentMembers();

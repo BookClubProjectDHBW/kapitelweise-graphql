@@ -76,7 +76,7 @@ amazonSQSService.sendMemberDeparture(userId, username, clubId);
     log.info(username + " hat Club " + clubId + " verlassen");
     return true;
 }
-    // Mit Hilfe der KI entwickelt
+    // KI-Log Nr. 26
     @Transactional
     public BookClubResponse createNewBookClub(String name, String description, String username){
 

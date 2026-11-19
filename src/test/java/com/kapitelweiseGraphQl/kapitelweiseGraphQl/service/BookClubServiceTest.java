@@ -31,6 +31,7 @@ class BookClubServiceTest {
         service = new BookClubService(bookclubDao, userDao, amazonSQSService);
     }
 
+    // KI-Log Nr. 59
     private void prepareSuccessfulCreation() {
         when(userDao.getUserId("fabrice")).thenReturn(Optional.of(7L));
         when(bookclubDao.createBookclub(any(BookClub.class)))
@@ -40,6 +41,7 @@ class BookClubServiceTest {
                 });
     }
 
+    // KI-Log Nr. 59
     private void assertBadRequest(String name, String description) {
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -107,6 +109,7 @@ class BookClubServiceTest {
         verify(bookclubDao).addMember(12L, 7L, "ADMIN");
     }
 
+    // KI-Log Nr. 59
     @Test
     void gruenderWirdAlsAdminZugeordnet() {
         prepareSuccessfulCreation();
@@ -134,6 +137,7 @@ class BookClubServiceTest {
         verifyNoInteractions(amazonSQSService);
     }
 
+    // KI-Log Nr. 59
     @Test
     void fehlerBeimSpeichernFuehrtZuKeinerAdminZuordnung() {
         when(userDao.getUserId("fabrice")).thenReturn(Optional.of(7L));

@@ -28,6 +28,7 @@ public class UserDaoImpl implements UserDao {
 
     }
 
+    // KI-Log Nr. 30
     @Override
     public void upsertUser(Long id, String username) {
         String sql = """

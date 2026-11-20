@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS clubmember (
 
 -- ein User kann pro Club nur einmal Mitglied sein
 -- (als Index statt im CREATE TABLE, damit es auch auf bereits bestehende Tabellen angewendet wird)
--- KI-Log Nr. 24
+-- KI-Log Nr. 25
 CREATE UNIQUE INDEX IF NOT EXISTS clubmember_user_club_unique ON clubmember (userid, bookclub_id);
 
 
@@ -39,7 +39,7 @@ Create Table if not exists invitation(
 );
 
 
--- KI-Log Nr. 24
+-- KI-Log Nr. 25
 CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
     ON invitation (bookclub_id, invited_user_id) WHERE invitation_status = 'PENDING';
 
@@ -47,7 +47,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
 -- für bestehende Datenbanken, auf denen die Tabelle schon ohne answered_at angelegt wurde
 ALTER TABLE invitation ADD COLUMN IF NOT EXISTS answered_at TIMESTAMP;
 
--- KI-Log Nr. 53
+-- KI-Log Nr. 54
 ALTER TABLE clubmember ADD COLUMN IF NOT EXISTS member_sent BOOLEAN NOT NULL DEFAULT false;
 
 ALTER TABLE clubmember ADD COLUMN IF NOT EXISTS left_at TIMESTAMP;

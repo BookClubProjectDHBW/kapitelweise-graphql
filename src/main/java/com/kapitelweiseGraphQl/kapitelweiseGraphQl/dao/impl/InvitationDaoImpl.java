@@ -97,7 +97,7 @@ public class InvitationDaoImpl implements InvitationDao {
     }
 
 
-    // KI-Log Nr. 31
+    // KI-Log Nr. 34
     @Override
     public void addMember(Long userId, Long bookClubId) {
         jdbcTemplate.update("""

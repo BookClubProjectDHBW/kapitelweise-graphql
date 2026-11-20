@@ -15,7 +15,7 @@ spring:
 
 app:
   jwt:
-    # KI-Log Nr. 78
+    # KI-Log Nr. 82
     secret: ${JWT_SECRET}
   cors:
     allowed-origins:  http://localhost:63342
@@ -24,6 +24,6 @@ app:
 cloud:
   aws:
     credentials:
-      # KI-Log Nr. 78
+      # KI-Log Nr. 82
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}

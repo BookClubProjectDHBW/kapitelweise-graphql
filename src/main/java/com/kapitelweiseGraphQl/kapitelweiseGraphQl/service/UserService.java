@@ -21,7 +21,7 @@ public class UserService {
     }
 
 
-    // KI-Log Nr. 26
+    // KI-Log Nr. 29
     public Member returnMember(String username){
 
         Long id = userDao.getUserId(username)

@@ -104,7 +104,7 @@ public class AmazonSQSService {
     }
 }
 
-    // KI-Log Nr. 57
+    // KI-Log Nr. 58
     @Scheduled(fixedDelay = 60000)
     public void sendMemberAgain(){
         List<MemberEvent> unsent = bookclubDao.getUnsentMembers();

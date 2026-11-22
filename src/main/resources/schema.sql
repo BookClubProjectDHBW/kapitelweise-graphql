@@ -47,7 +47,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitation_one_pending
 -- für bestehende Datenbanken, auf denen die Tabelle schon ohne answered_at angelegt wurde
 ALTER TABLE invitation ADD COLUMN IF NOT EXISTS answered_at TIMESTAMP;
 
--- KI-Log Nr. 57
+-- KI-Log Nr. 58
 ALTER TABLE clubmember ADD COLUMN IF NOT EXISTS member_sent BOOLEAN NOT NULL DEFAULT false;
 
 ALTER TABLE clubmember ADD COLUMN IF NOT EXISTS left_at TIMESTAMP;
